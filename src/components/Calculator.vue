@@ -21,9 +21,7 @@ import { uid } from 'uid'
 import { mapState, mapActions } from 'vuex'
 import buttonOptions from '../data/buttonOptions'
 import keypress from 'vue-keypress'
-
-const allowedNumberInputs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-const allowedSymbolInputs = ['+', '-', '/', '*']
+import { allowedNumberInputs, allowedSymbolInputs } from '../data/allowedInputs'
 
 export default {
   components: {
