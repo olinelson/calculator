@@ -31,7 +31,7 @@ export default {
     },
     async deleteHistory () {
       try {
-        await db.xcollection('history').delete()
+        await db.collection('history').delete()
         this.setHistory([])
         this.$q.notify({
           message: 'History deleted',
