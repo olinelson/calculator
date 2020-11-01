@@ -1,7 +1,7 @@
 <template lang="pug">
   .calculator-grid
-      .calculator-display.row.justify-end.content-center.q-px-md
-        .text-h1.text-white {{ calculatorDisplay }}
+      .calculator-display.row.justify-end.content-center(style="grid-area: display;")
+        .text-container.q-px-md.text-white {{ calculatorDisplay }}
       q-btn.no-border-radius(@click="clear" color="primary" style="grid-area: ac;")
           .text-h4.text-bold {{clearButtonLabel}}
       q-btn.no-border-radius(@click="flipPositiveNegative" color="primary" style="grid-area: plus-minus;")
@@ -107,6 +107,7 @@ export default {
         this.setHistory([...this.history, newHistoryItem])
       } catch (error) {
         this.$q.notify({
+          position: 'top',
           message: 'Error saving history',
           color: 'negative',
           icon: 'fas fa-times'
@@ -173,7 +174,7 @@ export default {
 <style>
 .calculator-grid {
   display: grid;
-  height: calc(100vh - 3rem - 40px);
+  height: calc(100vh - 3rem - 100px);
   width: 100%;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-auto-rows: minmax(1fr, auto);
@@ -186,9 +187,9 @@ export default {
     'one two three plus'
     'zero zero point equals';
 }
-.calculator-display {
-  grid-area: display;
+.text-container {
+  font-size: 4rem;
+  max-width: 100%;
   overflow-x: scroll;
-  overflow-y: hidden;
 }
 </style>
