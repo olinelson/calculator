@@ -13,7 +13,10 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "localbase": "^0.7.4",
+    "quasar": "^1.0.0",
+    "uid": "^2.0.0",
+    "vue-keypress": "^2.1.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

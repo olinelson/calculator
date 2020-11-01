@@ -1,73 +1,47 @@
 <template lang="pug">
     .full-width
         .calculator-grid
-            .flex.content-center(style="grid-area: display; overflow-x: scroll; overflow-y: hidden; min-height: 5rem;")
-                .text-h1.text-right.full-width {{ calculatorDisplay }}
-            q-btn(@click="clear" color="grey" style="grid-area: ac;")
-                .text-h4.text-bold AC
-            q-btn(@click="flipPositiveNegative" color="grey" style="grid-area: plus-minus;")
+            .calculator-display.row.justify-end.content-center.q-pa-md
+              .text-h1.text-white {{ calculatorDisplay }}
+            q-btn.no-border-radius(@click="clear" color="primary" style="grid-area: ac;")
+                .text-h4.text-bold {{clearButtonLabel}}
+            q-btn.no-border-radius(@click="flipPositiveNegative" color="primary" style="grid-area: plus-minus;")
                 .text-h4.text-bold +/-
-            q-btn(@click="getPercentage" color="grey" style="grid-area: percent;")
+            q-btn.no-border-radius(@click="getPercentage" color="primary" style="grid-area: percent;")
                 .text-h4.text-bold %
-            q-btn(v-for="btn in buttonOptions" :key="btn.gridArea" :icon="btn.icon" :color="btn.color" :style="`grid-area: ${btn.gridArea};`" @click="onButtonPress(btn)" )
+            q-btn.no-border-radius(v-for="btn in buttonOptions" :key="btn.gridArea" :icon="btn.icon" :color="btn.color" :style="`grid-area: ${btn.gridArea};`" @click="onButtonPress(btn)" )
                 .text-h4.text-bold {{btn.label}}
-            q-btn(@click="evaluate" :style="`grid-area: equals;`" icon="fas fa-equals" color="orange")
+            q-btn.no-border-radius(@click="evaluate" :style="`grid-area: equals;`" icon="fas fa-equals" color="accent")
+        keypress(key-event="keyup" @success="onKeyPress")
+
 </template>
 <script>
-const buttonOptions = [
-  { value: '1', label: '1', gridArea: 'one', type: 'number', color: 'grey' },
-  { value: '2', label: '2', gridArea: 'two', type: 'number', color: 'grey' },
-  { value: '3', label: '3', gridArea: 'three', type: 'number', color: 'grey' },
-  { value: '4', label: '4', gridArea: 'four', type: 'number', color: 'grey' },
-  { value: '5', label: '5', gridArea: 'five', type: 'number', color: 'grey' },
-  { value: '6', label: '6', gridArea: 'six', type: 'number', color: 'grey' },
-  { value: '7', label: '7', gridArea: 'seven', type: 'number', color: 'grey' },
-  { value: '8', label: '8', gridArea: 'eight', type: 'number', color: 'grey' },
-  { value: '9', label: '9', gridArea: 'nine', type: 'number', color: 'grey' },
-  { value: '0', label: '0', gridArea: 'zero', type: 'number', color: 'grey' },
-  { value: '.', label: '.', gridArea: 'point', type: 'number', color: 'grey' },
-  {
-    value: '+',
-    icon: 'fas fa-plus',
-    gridArea: 'plus',
-    type: 'command',
-    color: 'orange'
-  },
-  {
-    value: '-',
-    icon: 'fas fa-minus',
-    gridArea: 'minus',
-    type: 'command',
-    color: 'orange'
-  },
-  {
-    value: '*',
-    icon: 'fas fa-times',
-    gridArea: 'times',
-    type: 'command',
-    color: 'orange'
-  },
-  {
-    value: '%',
-    icon: 'fas fa-divide',
-    gridArea: 'divide',
-    type: 'command',
-    color: 'orange'
-  }
-]
+import { db } from 'boot/localbase'
+import { uid } from 'uid'
+import { mapState, mapActions } from 'vuex'
+import buttonOptions from '../data/buttonOptions'
+import keypress from 'vue-keypress'
+
+const allowedNumberInputs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+const allowedSymbolInputs = ['+', '-', '/', '*']
 
 export default {
+  components: {
+    keypress
+  },
   data () {
     return {
       buttonOptions,
       calculatorInput: '',
-      answer: 0,
+      answer: null,
       calculatorDisplay: 0,
       displayingAnswer: false,
-      history: []
+      allowedNumberInputs,
+      allowedSymbolInputs
     }
   },
   computed: {
+    ...mapState('history', ['history']),
     numbers () {
       return this.calculatorInput
         .split(' ')
@@ -78,6 +52,10 @@ export default {
       return this.calculatorInput
         .split(' ')
         .filter(i => !parseFloat(i) && i.length)
+    },
+    clearButtonLabel () {
+      if (this.calculatorInput.length && !this.displayingAnswer) return 'C'
+      return 'AC'
     }
   },
   watch: {
@@ -86,6 +64,19 @@ export default {
     }
   },
   methods: {
+    ...mapActions('history', ['setHistory']),
+    onKeyPress (e) {
+      const key = e.event.key
+      if (allowedNumberInputs.includes(key)) {
+        return this.onNumberPress(key)
+      } else if (allowedSymbolInputs.includes(key)) {
+        return this.onCommandPress(key)
+      } else if (key === '=' || key === 'Enter') {
+        return this.evaluate()
+      } else if (key === 'c') {
+        return this.clear()
+      }
+    },
     onButtonPress (btn) {
       if (btn.type === 'number') this.onNumberPress(btn.value)
       else this.onCommandPress(btn.value)
@@ -101,24 +92,55 @@ export default {
       this.calculatorInput += ` ${command} `
     },
     clear () {
-      this.answer = 0
+      this.answer = null
       this.calculatorInput = ''
     },
+    async saveAnswerToHistory (calculatorInput, answer) {
+      try {
+        const id = uid()
+        await db.collection('history').add({
+          id,
+          createdAt: Date.now(),
+          sum: `${calculatorInput} = ${answer}`
+        })
+        const newHistoryItem = await db
+          .collection('history')
+          .doc({ id })
+          .get()
+        this.setHistory([...this.history, newHistoryItem])
+      } catch (error) {
+        this.$q.notify({
+          message: 'Error saving history',
+          color: 'negative',
+          icon: 'fas fa-times'
+        })
+      }
+    },
     displayAnswer () {
-      this.history.push(`${this.calculatorInput} = ${this.answer}`)
       this.displayingAnswer = true
+      this.saveAnswerToHistory(this.calculatorInput, this.answer)
       this.calculatorDisplay = this.answer
       this.calculatorInput = `${this.answer}`
     },
+    getAnswerOrLastNumber () {
+      if (this.answer) {
+        return this.answer
+      }
+      return this.numbers[this.numbers.length - 1]
+    },
     flipPositiveNegative () {
-      if (this.answer < 0) {
-        this.answer = Math.abs(this.answer)
-      } else this.answer = -Math.abs(this.answer)
+      const num = this.getAnswerOrLastNumber()
+
+      if (num < 0) {
+        this.answer = Math.abs(num)
+      } else this.answer = -Math.abs(num)
 
       this.displayAnswer()
     },
     getPercentage () {
-      this.answer = this.answer / 100
+      const num = this.getAnswerOrLastNumber()
+
+      this.answer = num / 100
       this.displayAnswer()
     },
     evaluate () {
@@ -136,10 +158,10 @@ export default {
         case '-':
           this.answer = this.answer - num
           break
-        case '/':
+        case '÷':
           this.answer = this.answer / num
           break
-        case '*':
+        case 'x':
           this.answer = this.answer * num
           break
 
@@ -156,9 +178,8 @@ export default {
   display: grid;
   height: 90vh;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-auto-rows: 1fr;
-  grid-gap: 0.5rem;
-  padding: 0.5rem;
+  grid-auto-rows: minmax(1fr, auto);
+  grid-gap: 0.1rem;
   grid-template-areas:
     'display display display display'
     'ac plus-minus percent divide'
@@ -166,5 +187,11 @@ export default {
     'four five six minus'
     'one two three plus'
     'zero zero point equals';
+}
+.calculator-display {
+  grid-area: display;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  min-height: 5rem;
 }
 </style>
