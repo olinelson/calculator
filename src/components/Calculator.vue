@@ -1,18 +1,17 @@
 <template lang="pug">
-    .full-width
-        .calculator-grid
-            .calculator-display.row.justify-end.content-center.q-px-md
-              .text-h1.text-white {{ calculatorDisplay }}
-            q-btn.no-border-radius(@click="clear" color="primary" style="grid-area: ac;")
-                .text-h4.text-bold {{clearButtonLabel}}
-            q-btn.no-border-radius(@click="flipPositiveNegative" color="primary" style="grid-area: plus-minus;")
-                .text-h4.text-bold +/-
-            q-btn.no-border-radius(@click="getPercentage" color="primary" style="grid-area: percent;")
-                .text-h4.text-bold %
-            q-btn.no-border-radius(v-for="btn in buttonOptions" :key="btn.gridArea" :icon="btn.icon" :color="btn.color" :style="`grid-area: ${btn.gridArea};`" @click="onButtonPress(btn)" )
-                .text-h4.text-bold {{btn.label}}
-            q-btn.no-border-radius(@click="evaluate" :style="`grid-area: equals;`" icon="fas fa-equals" color="accent")
-        keypress(key-event="keyup" @success="onKeyPress")
+  .calculator-grid
+      .calculator-display.row.justify-end.content-center.q-px-md
+        .text-h1.text-white {{ calculatorDisplay }}
+      q-btn.no-border-radius(@click="clear" color="primary" style="grid-area: ac;")
+          .text-h4.text-bold {{clearButtonLabel}}
+      q-btn.no-border-radius(@click="flipPositiveNegative" color="primary" style="grid-area: plus-minus;")
+          .text-h4.text-bold +/-
+      q-btn.no-border-radius(@click="getPercentage" color="primary" style="grid-area: percent;")
+          .text-h4.text-bold %
+      q-btn.no-border-radius(v-for="btn in buttonOptions" :key="btn.gridArea" :icon="btn.icon" :color="btn.color" :style="`grid-area: ${btn.gridArea};`" @click="onButtonPress(btn)" )
+          .text-h4.text-bold {{btn.label}}
+      q-btn.no-border-radius(@click="evaluate" :style="`grid-area: equals;`" icon="fas fa-equals" color="accent")
+      keypress(key-event="keyup" @success="onKeyPress")
 
 </template>
 <script>
@@ -173,9 +172,9 @@ export default {
 
 <style>
 .calculator-grid {
-  -webkit-overflow-scrolling: touch;
   display: grid;
   height: calc(100vh - 3rem);
+  width: 100%;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-auto-rows: minmax(1fr, auto);
   grid-gap: 0.1rem;
