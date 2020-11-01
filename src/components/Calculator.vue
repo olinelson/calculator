@@ -173,8 +173,9 @@ export default {
 
 <style>
 .calculator-grid {
+  -webkit-overflow-scrolling: touch;
   display: grid;
-  height: 90vh;
+  height: calc(100vh - 3rem);
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-auto-rows: minmax(1fr, auto);
   grid-gap: 0.1rem;
