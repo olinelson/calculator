@@ -3,7 +3,6 @@
     q-header
       q-toolbar.bg-dark
         q-btn(flat dense round icon="fas fa-history" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen")
-
         q-toolbar-title Calculator
 
     q-drawer(v-model="leftDrawerOpen"  dark show-if-above bordered)
