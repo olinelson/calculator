@@ -173,7 +173,7 @@ export default {
 <style>
 .calculator-grid {
   display: grid;
-  height: calc(100vh - 40);
+  height: calc(100vh - 3rem - 40px);
   width: 100%;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-auto-rows: minmax(1fr, auto);
