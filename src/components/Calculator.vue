@@ -1,7 +1,7 @@
 <template lang="pug">
     .full-width
         .calculator-grid
-            .calculator-display.row.justify-end.content-center.q-pa-md
+            .calculator-display.row.justify-end.content-center.q-px-md
               .text-h1.text-white {{ calculatorDisplay }}
             q-btn.no-border-radius(@click="clear" color="primary" style="grid-area: ac;")
                 .text-h4.text-bold {{clearButtonLabel}}
@@ -190,6 +190,5 @@ export default {
   grid-area: display;
   overflow-x: scroll;
   overflow-y: hidden;
-  min-height: 5rem;
 }
 </style>
